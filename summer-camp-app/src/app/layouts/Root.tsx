@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router';
 import { Tent, Map, GitCompare } from 'lucide-react';
 import { InterestWeightsProvider } from '../context/InterestWeightsContext';
+import { TripDatesProvider } from '../context/TripDatesContext';
 import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
 
 export default function Root() {
@@ -65,7 +66,9 @@ export default function Root() {
       {/* Main Content — shared interest weights for match scores across pages */}
       <main>
         <InterestWeightsProvider>
-          <Outlet />
+          <TripDatesProvider>
+            <Outlet />
+          </TripDatesProvider>
         </InterestWeightsProvider>
       </main>
 

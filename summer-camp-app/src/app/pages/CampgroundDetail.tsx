@@ -15,8 +15,11 @@ import {
   CheckCircle2,
   Lightbulb,
   Activity,
+  CalendarRange,
 } from 'lucide-react';
 import { useInterestWeights } from '../context/InterestWeightsContext';
+import { useTripDates } from '../context/TripDatesContext';
+import { buildWaGoingToCampResultsUrl } from '../lib/waGoingToCamp';
 import { computeMatchScore } from '../lib/interestWeights';
 import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
@@ -24,7 +27,9 @@ import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
 export default function CampgroundDetail() {
   const { id } = useParams();
   const { weights } = useInterestWeights();
+  const { startDate, endDate, setStartDate, setEndDate } = useTripDates();
   const campground = campgrounds.find((c) => c.id === id);
+  const waGoingToCampUrl = buildWaGoingToCampResultsUrl(startDate, endDate);
 
   if (!campground) {
     return (
@@ -65,6 +70,9 @@ export default function CampgroundDetail() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute bottom-6 left-6 right-6 text-white">
           <div className="flex items-center gap-3 mb-3">
+            <span className="rounded-full bg-emerald-600 px-4 py-1 text-sm font-medium text-white shadow-sm">
+              WA State
+            </span>
             <span className={`${regionColors[campground.region]} px-4 py-1 rounded-full text-sm font-medium`}>
               {campground.region}
             </span>
@@ -237,6 +245,43 @@ export default function CampgroundDetail() {
               ))}
             </div>
 
+            <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+              <div className="mb-2 flex items-center gap-2 font-medium text-gray-900">
+                <CalendarRange className="h-4 w-4 text-green-600" aria-hidden />
+                Trip dates (same as home page)
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex flex-col gap-0.5 text-xs text-gray-600">
+                  First night
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="rounded border border-gray-200 px-2 py-1 text-gray-900"
+                  />
+                </label>
+                <label className="flex flex-col gap-0.5 text-xs text-gray-600">
+                  Last night
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="rounded border border-gray-200 px-2 py-1 text-gray-900"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <a
+              href={waGoingToCampUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 px-6 py-3 font-semibold text-emerald-900 transition hover:bg-emerald-100"
+            >
+              Check availability (GoingToCamp)
+              <ExternalLink className="h-4 w-4" />
+            </a>
+
             {/* Booking CTA */}
             <a
               href={campground.bookingUrl}
@@ -244,7 +289,7 @@ export default function CampgroundDetail() {
               rel="noopener noreferrer"
               className="w-full bg-green-600 text-white px-6 py-4 rounded-lg hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2 mb-4"
             >
-              Book This Campground
+              Book / park info
               <ExternalLink className="w-4 h-4" />
             </a>
 
