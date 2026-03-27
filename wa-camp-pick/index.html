@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WA Summer Camp Safari — Pick Our Spot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="hero">
+    <p class="eyebrow">July · August · September · ~8 people · 3 tents</p>
+    <h1>Summer camp safari</h1>
+    <p class="lede">
+      Washington picks from your list — compare, score with your own priorities, and rally the crew.
+      Book on <a href="https://www.parks.wa.gov/" target="_blank" rel="noopener">Washington State Parks</a> (opens ~9 months ahead for peak weekends).
+    </p>
+    <div class="hero-badges">
+      <span class="badge">Bothell base</span>
+      <span class="badge">≤3 hr drive OK</span>
+      <span class="badge">Family-style car camping</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel weights-panel" aria-labelledby="weights-heading">
+      <h2 id="weights-heading">How should we pick? <span class="hint">Slide to match the group</span></h2>
+      <p class="weights-intro">We blend these into a fun “match score” for each place. Crank what matters to <em>your</em> party.</p>
+      <div class="sliders" id="weight-sliders"></div>
+      <div class="weight-actions">
+        <button type="button" class="btn ghost" id="reset-weights">Reset sliders</button>
+        <button type="button" class="btn primary" id="sort-by-score">Sort cards by match</button>
+      </div>
+    </section>
+
+    <section class="panel map-panel" aria-labelledby="map-heading">
+      <div class="map-head">
+        <h2 id="map-heading">Where they sit</h2>
+        <p class="map-note">Tap a pin for the name — cards below have the deep dive.</p>
+      </div>
+      <div id="map" class="map" role="region" aria-label="Map of campgrounds"></div>
+    </section>
+
+    <section class="panel compare-panel" aria-labelledby="compare-heading">
+      <h2 id="compare-heading">Compare shortlist</h2>
+      <p class="compare-hint">Use “Compare” on up to 3 spots, then open the table.</p>
+      <div class="compare-bar">
+        <div id="compare-chips" class="compare-chips"></div>
+        <button type="button" class="btn secondary" id="open-compare" disabled>Open comparison</button>
+        <button type="button" class="btn ghost" id="clear-compare">Clear</button>
+      </div>
+      <dialog id="compare-dialog" class="compare-dialog">
+        <form method="dialog" class="dialog-toolbar">
+          <button type="submit" class="btn ghost" value="cancel">Close</button>
+        </form>
+        <div id="compare-table-wrap" class="compare-table-wrap"></div>
+      </dialog>
+    </section>
+
+    <section class="cards-section" aria-labelledby="cards-heading">
+      <h2 id="cards-heading" class="visually-hidden">Campgrounds</h2>
+      <div id="cards" class="cards"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Drive times are rough road estimates from Bothell — check your favorite maps app before you commit.
+      Photos are representative (Wikimedia / open sources); always confirm current conditions with official park pages.
+    </p>
+    <p class="footer-links">
+      <a href="https://www.parks.wa.gov/" target="_blank" rel="noopener">WA State Parks</a>
+      ·
+      <a href="https://www.recreation.gov/" target="_blank" rel="noopener">Recreation.gov</a> (national forests / some federal)
+    </p>
+  </footer>
+
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

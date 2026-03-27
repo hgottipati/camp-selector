@@ -1,0 +1,5 @@
+/* Leaflet divIcon markers — no default tile-sized box */
+.leaflet-div-icon.wa-camp-marker {
+  background: transparent !important;
+  border: none !important;
+}
