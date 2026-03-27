@@ -9,10 +9,21 @@ import { computeMatchScore } from '../lib/interestWeights';
 import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { InterestWeightsPanel } from '../components/InterestWeightsPanel';
 import { LokiMatchScore } from '../components/LokiMatchBrand';
+import { WashingtonRegionPicker, type RegionCode } from '../components/WashingtonRegionPicker';
 
 export default function Home() {
-  const [selectedRegion, setSelectedRegion] = useState<string>('all');
+  const [selectedRegion, setSelectedRegion] = useState<RegionCode>('all');
   const { weights } = useInterestWeights();
+
+  const regionCounts = useMemo(
+    () => ({
+      NW: campgrounds.filter((c) => c.region === 'NW').length,
+      NE: campgrounds.filter((c) => c.region === 'NE').length,
+      SW: campgrounds.filter((c) => c.region === 'SW').length,
+      SE: campgrounds.filter((c) => c.region === 'SE').length,
+    }),
+    [],
+  );
 
   const filteredCampgrounds = useMemo(() => {
     const base =
@@ -60,7 +71,16 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Region Filter */}
+      <div className="mb-6">
+        <WashingtonRegionPicker
+          value={selectedRegion}
+          onChange={setSelectedRegion}
+          counts={regionCounts}
+          total={campgrounds.length}
+        />
+      </div>
+
+      {/* Region Filter (chips — same state as map quarters) */}
       <div className="flex gap-3 mb-6 flex-wrap">
         <button
           onClick={() => setSelectedRegion('all')}
