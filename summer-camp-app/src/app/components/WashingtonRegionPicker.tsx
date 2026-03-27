@@ -11,12 +11,13 @@ type WashingtonRegionPickerProps = {
 };
 
 /**
- * Schematic Washington outline in a normalized viewBox (0–80 wide, 0–100 tall).
- * Not survey-grade — tuned so quadrant splits match how campgrounds are tagged in data
- * (roughly: west of ~-120.5° and north/south of ~47.25°).
+ * Simplified closed path for clipping quadrant highlights only (same viewBox as artwork).
+ * Geographic splits use SPLIT_X / SPLIT_Y; the visible outline comes from `washington-outline.jpg`.
  */
 const WA_OUTLINE_D =
   'M 6 14 L 5 42 L 9 68 L 16 82 L 32 91 L 52 92 L 66 86 L 74 72 L 78 48 L 76 26 L 68 12 L 44 7 L 22 9 Z';
+
+const WA_OUTLINE_SRC = `${import.meta.env.BASE_URL}washington-outline.jpg`;
 
 /** Vertical split (lon ~-120.5) and horizontal (lat ~47.25) in the same coordinate space. */
 const SPLIT_X = 43.5;
@@ -74,7 +75,7 @@ export function WashingtonRegionPicker({ value, onChange, counts, total }: Washi
         <div>
           <h3 className="text-base font-semibold text-gray-900">Pick a region on the map</h3>
           <p className="text-xs text-gray-500 sm:text-sm">
-            Tap a quarter of Washington — same filters as the buttons below. Outline is simplified, not a survey map.
+            Tap a quarter of Washington — same filters as the buttons below. Regions use a simple grid, not county lines.
           </p>
         </div>
         <button
@@ -103,16 +104,6 @@ export function WashingtonRegionPicker({ value, onChange, counts, total }: Washi
               <path d={WA_OUTLINE_D} />
             </clipPath>
           </defs>
-
-          {/* State silhouette stroke (behind interactive fills) */}
-          <path
-            d={WA_OUTLINE_D}
-            fill="none"
-            stroke="rgb(55 65 81)"
-            strokeWidth={1.2}
-            strokeLinejoin="round"
-            className="text-gray-700"
-          />
 
           <g clipPath={`url(#${clipId})`}>
             {(Object.keys(REGION_META) as Campground['region'][]).map((region) => {
@@ -167,14 +158,15 @@ export function WashingtonRegionPicker({ value, onChange, counts, total }: Washi
             })}
           </g>
 
-          {/* Outline again on top so borders read clearly over fills */}
-          <path
-            d={WA_OUTLINE_D}
-            fill="none"
-            stroke="rgb(31 41 55)"
-            strokeWidth={1.5}
-            strokeLinejoin="round"
-            pointerEvents="none"
+          {/* Real WA outline (white in source → shows fills via multiply; black strokes stay crisp) */}
+          <image
+            href={WA_OUTLINE_SRC}
+            x={0}
+            y={0}
+            width={80}
+            height={100}
+            preserveAspectRatio="xMidYMid meet"
+            className="pointer-events-none mix-blend-multiply"
           />
         </svg>
       </div>
