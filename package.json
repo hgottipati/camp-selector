@@ -4,7 +4,9 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-      "build": "vite build"
+      "build": "vite build",
+      "dev": "npm run dev --prefix summer-camp-app",
+      "preview": "npm run preview --prefix summer-camp-app"
     },
     "dependencies": {
       "@emotion/react": "11.14.0",

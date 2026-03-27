@@ -2,17 +2,18 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { campgrounds } from '../data/campgrounds';
+import { campgrounds, type Campground } from '../data/campgrounds';
 import { MapPin, Clock, Star, Thermometer, Waves, ChevronRight } from 'lucide-react';
 import { useInterestWeights } from '../context/InterestWeightsContext';
 import { computeMatchScore } from '../lib/interestWeights';
 import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { InterestWeightsPanel } from '../components/InterestWeightsPanel';
 import { LokiMatchScore } from '../components/LokiMatchBrand';
-import { WashingtonRegionPicker, type RegionCode } from '../components/WashingtonRegionPicker';
+
+type RegionFilter = 'all' | Campground['region'];
 
 export default function Home() {
-  const [selectedRegion, setSelectedRegion] = useState<RegionCode>('all');
+  const [selectedRegion, setSelectedRegion] = useState<RegionFilter>('all');
   const { weights } = useInterestWeights();
 
   const regionCounts = useMemo(
@@ -71,66 +72,61 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="mb-6">
-        <WashingtonRegionPicker
-          value={selectedRegion}
-          onChange={setSelectedRegion}
-          counts={regionCounts}
-          total={campgrounds.length}
-        />
-      </div>
-
-      {/* Region Filter (chips — same state as map quarters) */}
       <div className="flex gap-3 mb-6 flex-wrap">
         <button
+          type="button"
           onClick={() => setSelectedRegion('all')}
           className={`px-5 py-2.5 rounded-lg transition ${
             selectedRegion === 'all'
               ? 'bg-green-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
           }`}
         >
-          All Regions ({campgrounds.length})
+          All regions ({campgrounds.length})
         </button>
         <button
+          type="button"
           onClick={() => setSelectedRegion('NW')}
           className={`px-5 py-2.5 rounded-lg transition ${
             selectedRegion === 'NW'
               ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
           }`}
         >
-          Northwest 🌲
+          Northwest 🌲 ({regionCounts.NW})
         </button>
         <button
+          type="button"
           onClick={() => setSelectedRegion('NE')}
           className={`px-5 py-2.5 rounded-lg transition ${
             selectedRegion === 'NE'
               ? 'bg-yellow-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
           }`}
         >
-          Northeast ☀️
+          Northeast ☀️ ({regionCounts.NE})
         </button>
         <button
+          type="button"
           onClick={() => setSelectedRegion('SW')}
           className={`px-5 py-2.5 rounded-lg transition ${
             selectedRegion === 'SW'
               ? 'bg-green-700 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
           }`}
         >
-          Southwest 🌳
+          Southwest 🌳 ({regionCounts.SW})
         </button>
         <button
+          type="button"
           onClick={() => setSelectedRegion('SE')}
           className={`px-5 py-2.5 rounded-lg transition ${
             selectedRegion === 'SE'
               ? 'bg-orange-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
           }`}
         >
-          Southeast 🏜️
+          Southeast 🏜️ ({regionCounts.SE})
         </button>
       </div>
 
@@ -219,8 +215,7 @@ export default function Home() {
       <div className="mt-12 bg-blue-100 rounded-2xl p-8 text-center">
         <h3 className="text-2xl font-bold text-gray-900 mb-3">Can't Decide? 🤔</h3>
         <p className="text-gray-700 mb-5">
-          Use our comparison tool to see campgrounds side-by-side, or check out the map to see where
-          they all are!
+          Use our comparison tool to see campgrounds side-by-side, or open the map to see where they sit in the state.
         </p>
         <div className="flex gap-3 justify-center flex-wrap">
           <Link
@@ -231,7 +226,7 @@ export default function Home() {
           </Link>
           <Link
             to="/map"
-            className="bg-white text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-100 transition shadow-md"
+            className="bg-white text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-100 transition shadow-md border border-gray-200"
           >
             View on Map
           </Link>
