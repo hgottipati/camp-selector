@@ -96,7 +96,16 @@ export default function MapView() {
 
     map.fitBounds(bounds, { padding: [56, 56], maxZoom: 8 });
 
+    const mapHost = el.parentElement;
+    const ro =
+      mapHost &&
+      new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+    if (mapHost && ro) ro.observe(mapHost);
+
     return () => {
+      ro?.disconnect();
       map.remove();
       mapRef.current = null;
       markersRef.current = {};
@@ -127,8 +136,9 @@ export default function MapView() {
   }, [selectedCampground]);
 
   return (
-    <div className="flex h-[calc(100vh-120px)] min-h-[480px]">
-      <div className="w-96 shrink-0 overflow-y-auto bg-white shadow-lg">
+    <div className="flex w-full min-w-0 flex-col md:h-[calc(100dvh-9rem)] md:min-h-[480px] md:max-h-[calc(100dvh-9rem)] md:flex-row">
+      {/* Sidebar: full-width scroll on phones; fixed width column on md+ */}
+      <div className="max-h-[42dvh] w-full shrink-0 overflow-y-auto border-b border-gray-200 bg-white shadow-md md:max-h-none md:h-full md:w-96 md:shrink-0 md:border-b-0 md:shadow-lg">
         <div className="bg-gradient-to-r from-green-600 to-blue-600 p-6 text-white">
           <h2 className="mb-2 text-2xl font-bold">Campground map</h2>
           <p className="text-sm text-white/90">
@@ -196,11 +206,11 @@ export default function MapView() {
         </div>
       </div>
 
-      <div className="relative min-w-0 flex-1 bg-slate-100">
+      <div className="relative h-[min(58dvh,560px)] min-h-[280px] w-full min-w-0 flex-1 bg-slate-100 md:h-auto md:min-h-0">
         <div ref={mapElRef} className="absolute inset-0 z-0" />
 
         <div className="pointer-events-none absolute inset-0 z-[500]">
-          <div className="pointer-events-auto absolute top-4 right-4 max-w-[200px] rounded-lg bg-white/95 p-4 shadow-lg backdrop-blur">
+          <div className="pointer-events-auto absolute top-3 left-3 max-w-[min(200px,calc(100%-1.5rem))] rounded-lg bg-white/95 p-3 text-sm shadow-lg backdrop-blur md:left-auto md:top-4 md:right-4 md:max-w-[200px] md:p-4 md:text-base">
             <h4 className="mb-3 font-bold text-gray-900">Legend</h4>
             <div className="space-y-2 text-sm text-gray-700">
               <div className="flex items-center gap-2">
@@ -222,7 +232,7 @@ export default function MapView() {
           </div>
 
           {selectedCampground && (
-            <div className="pointer-events-auto absolute bottom-6 left-1/2 z-[501] w-[min(100%-2rem,28rem)] -translate-x-1/2 overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div className="pointer-events-auto absolute right-3 bottom-4 left-3 z-[501] max-w-none overflow-hidden rounded-xl bg-white shadow-2xl md:bottom-6 md:left-1/2 md:w-[min(100%-2rem,28rem)] md:max-w-[28rem] md:-translate-x-1/2 md:right-auto">
               <img
                 src={selectedCampground.image}
                 alt={selectedCampground.name}
