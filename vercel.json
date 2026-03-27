@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd summer-camp-app && npm ci",
+  "buildCommand": "cd summer-camp-app && npm run build",
+  "outputDirectory": "summer-camp-app/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
