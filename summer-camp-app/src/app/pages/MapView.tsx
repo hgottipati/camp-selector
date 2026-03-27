@@ -136,13 +136,107 @@ export default function MapView() {
   }, [selectedCampground]);
 
   return (
-    <div className="flex w-full min-w-0 flex-col md:h-[calc(100dvh-9rem)] md:min-h-[480px] md:max-h-[calc(100dvh-9rem)] md:flex-row">
-      {/* Sidebar: full-width scroll on phones; fixed width column on md+ */}
-      <div className="max-h-[42dvh] w-full shrink-0 overflow-y-auto border-b border-gray-200 bg-white shadow-md md:max-h-none md:h-full md:w-96 md:shrink-0 md:border-b-0 md:shadow-lg">
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 p-6 text-white">
-          <h2 className="mb-2 text-2xl font-bold">Campground map</h2>
-          <p className="text-sm text-white/90">
-            Real map (OpenStreetMap). Tap a pin or pick from the list. Red dot = Bothell.
+    <div className="flex h-[calc(100dvh-10.5rem)] min-h-[360px] w-full min-w-0 flex-col overflow-hidden md:h-[calc(100dvh-9rem)] md:min-h-[480px] md:max-h-[calc(100dvh-9rem)] md:flex-row">
+      {/* Map first on small screens so it gets real height; list below, scrollable */}
+      <div className="relative order-1 min-h-0 w-full min-w-0 flex-1 bg-slate-100 md:order-2 md:h-full md:min-h-0 md:flex-1">
+        {/* Shorter on mobile so tiles + attribution sit above the compact bottom bar */}
+        <div
+          ref={mapElRef}
+          className="absolute inset-x-0 top-0 bottom-[4.25rem] z-0 md:inset-0"
+        />
+
+        <div className="pointer-events-none absolute inset-0 z-[500]">
+          <div className="pointer-events-auto absolute top-3 right-3 z-[502] max-w-[min(180px,calc(100%-5.5rem))] rounded-lg bg-white/95 p-2.5 text-xs shadow-lg backdrop-blur md:right-4 md:max-w-[200px] md:p-4 md:text-sm">
+            <h4 className="mb-2 font-bold text-gray-900">Legend</h4>
+            <div className="space-y-1.5 text-gray-700 md:space-y-2 md:text-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" /> NW
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-yellow-600" /> NE
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-green-600" /> SW
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-orange-600" /> SE
+              </div>
+              <div className="flex items-center gap-2 border-t border-gray-200 pt-1.5">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500 ring-2 ring-white" /> Bothell
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop / tablet: richer card above map */}
+          {selectedCampground && (
+            <div className="pointer-events-auto absolute bottom-4 left-1/2 z-[501] hidden w-[min(100%-2rem,28rem)] max-w-[28rem] -translate-x-1/2 overflow-hidden rounded-xl bg-white shadow-2xl md:block">
+              <img
+                src={selectedCampground.image}
+                alt={selectedCampground.name}
+                className="h-32 w-full object-cover"
+              />
+              <div className="p-4">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <h3 className="text-xl font-bold text-gray-900">{selectedCampground.name}</h3>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-1 text-sm">
+                      <Star className="h-3 w-3 fill-current" />
+                      {selectedCampground.scenicRating}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-800">
+                      <Sparkles className="h-3.5 w-3.5 shrink-0 text-rose-600" aria-hidden />
+                      {LOKI_MATCH_NAME} {computeMatchScore(selectedCampground.matchScores, weights)}
+                    </span>
+                  </div>
+                </div>
+                <p className="mb-3 line-clamp-2 text-sm text-gray-600">{selectedCampground.description}</p>
+                <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex items-center gap-1 text-gray-600">
+                    <MapPin className="h-4 w-4" />
+                    <span>{selectedCampground.distanceFromBothell} miles</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-gray-600">
+                    <Clock className="h-4 w-4" />
+                    <span>{selectedCampground.driveTime}</span>
+                  </div>
+                </div>
+                <Link
+                  to={`/campground/${selectedCampground.id}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+                >
+                  View full details
+                  <Navigation className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile: thin bar — full card was covering the whole map */}
+          {selectedCampground && (
+            <div className="pointer-events-auto absolute right-2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-2 z-[501] flex items-center gap-2 rounded-xl border border-gray-200 bg-white/95 p-2.5 pr-2 shadow-lg backdrop-blur md:hidden">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-gray-900">{selectedCampground.name}</p>
+                <p className="text-xs text-gray-500">
+                  Tap pins for more · {selectedCampground.distanceFromBothell} mi
+                </p>
+              </div>
+              <Link
+                to={`/campground/${selectedCampground.id}`}
+                className="shrink-0 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white"
+              >
+                Details
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Sidebar: scrollable strip under map on phones */}
+      <div className="order-2 max-h-[min(34vh,300px)] w-full shrink-0 overflow-y-auto border-t border-gray-200 bg-white shadow-md md:order-1 md:max-h-none md:h-full md:w-96 md:shrink-0 md:border-r md:border-t-0 md:shadow-lg">
+        <div className="bg-gradient-to-r from-green-600 to-blue-600 p-4 text-white md:p-6">
+          <h2 className="mb-1 text-xl font-bold md:mb-2 md:text-2xl">Campground map</h2>
+          <p className="text-xs text-white/90 md:text-sm">
+            OpenStreetMap — tap a pin or choose below. Red dot = Bothell.
           </p>
         </div>
 
@@ -203,76 +297,6 @@ export default function MapView() {
               </Link>
             </button>
           ))}
-        </div>
-      </div>
-
-      <div className="relative h-[min(58dvh,560px)] min-h-[280px] w-full min-w-0 flex-1 bg-slate-100 md:h-auto md:min-h-0">
-        <div ref={mapElRef} className="absolute inset-0 z-0" />
-
-        <div className="pointer-events-none absolute inset-0 z-[500]">
-          <div className="pointer-events-auto absolute top-3 left-3 max-w-[min(200px,calc(100%-1.5rem))] rounded-lg bg-white/95 p-3 text-sm shadow-lg backdrop-blur md:left-auto md:top-4 md:right-4 md:max-w-[200px] md:p-4 md:text-base">
-            <h4 className="mb-3 font-bold text-gray-900">Legend</h4>
-            <div className="space-y-2 text-sm text-gray-700">
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-blue-600" /> NW
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-yellow-600" /> NE
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-green-600" /> SW
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-orange-600" /> SE
-              </div>
-              <div className="flex items-center gap-2 border-t pt-2">
-                <span className="h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" /> Bothell
-              </div>
-            </div>
-          </div>
-
-          {selectedCampground && (
-            <div className="pointer-events-auto absolute right-3 bottom-4 left-3 z-[501] max-w-none overflow-hidden rounded-xl bg-white shadow-2xl md:bottom-6 md:left-1/2 md:w-[min(100%-2rem,28rem)] md:max-w-[28rem] md:-translate-x-1/2 md:right-auto">
-              <img
-                src={selectedCampground.image}
-                alt={selectedCampground.name}
-                className="h-32 w-full object-cover"
-              />
-              <div className="p-4">
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <h3 className="text-xl font-bold text-gray-900">{selectedCampground.name}</h3>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-1 text-sm">
-                      <Star className="h-3 w-3 fill-current" />
-                      {selectedCampground.scenicRating}
-                    </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-800">
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-rose-600" aria-hidden />
-                    {LOKI_MATCH_NAME} {computeMatchScore(selectedCampground.matchScores, weights)}
-                  </span>
-                  </div>
-                </div>
-                <p className="mb-3 line-clamp-2 text-sm text-gray-600">{selectedCampground.description}</p>
-                <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{selectedCampground.distanceFromBothell} miles</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <Clock className="h-4 w-4" />
-                    <span>{selectedCampground.driveTime}</span>
-                  </div>
-                </div>
-                <Link
-                  to={`/campground/${selectedCampground.id}`}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
-                >
-                  View full details
-                  <Navigation className="h-4 w-4" />
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
