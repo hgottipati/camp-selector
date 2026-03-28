@@ -16,10 +16,12 @@ import {
   Lightbulb,
   Activity,
   CalendarRange,
+  Map,
 } from 'lucide-react';
 import { useInterestWeights } from '../context/InterestWeightsContext';
 import { useTripDates } from '../context/TripDatesContext';
 import { buildWaGoingToCampResultsUrl } from '../lib/waGoingToCamp';
+import { resolveCampgroundMapsUrl } from '../lib/googleMapsUrl';
 import { computeMatchScore } from '../lib/interestWeights';
 import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
@@ -41,6 +43,8 @@ export default function CampgroundDetail() {
       </div>
     );
   }
+
+  const googleMapsUrl = resolveCampgroundMapsUrl(campground);
 
   const regionColors = {
     NW: 'bg-blue-600',
@@ -272,15 +276,27 @@ export default function CampgroundDetail() {
               </div>
             </div>
 
-            <a
-              href={waGoingToCampUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 px-6 py-3 font-semibold text-emerald-900 transition hover:bg-emerald-100"
-            >
-              Check availability (GoingToCamp)
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex flex-1 min-w-[10rem] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
+              >
+                <Map className="h-4 w-4 shrink-0 text-blue-600" aria-hidden />
+                Google Maps
+                <ExternalLink className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+              </a>
+              <a
+                href={waGoingToCampUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex flex-1 min-w-[10rem] items-center justify-center gap-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 px-4 py-3 font-semibold text-emerald-900 transition hover:bg-emerald-100"
+              >
+                Check availability (GoingToCamp)
+                <ExternalLink className="h-4 w-4 shrink-0" />
+              </a>
+            </div>
 
             {/* Booking CTA */}
             <a

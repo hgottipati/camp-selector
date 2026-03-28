@@ -38,6 +38,8 @@ export interface Campground {
   bestFor: string[];
   image: string;
   bookingUrl: string;
+  /** Google Maps place, share link (maps.app.goo.gl), or /maps/search/?api=1&query=… with official address. Falls back to lat/lng if omitted. */
+  googleMapsUrl?: string;
   season: string[];
   matchScores: MatchScores;
 }
@@ -80,6 +82,8 @@ export const campgrounds: Campground[] = [
     bestFor: ['Families', 'Water activities', 'Seafood lovers', 'Beach camping'],
     image: 'https://images.unsplash.com/photo-1570747792707-139b1110f5d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob29kJTIwY2FuYWwlMjB3YXNoaW5ndG9ufGVufDF8fHx8MTc3NDU5NDQ4NHww&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=21020%20N%20US%20Highway%20101%2C%20Shelton%2C%20WA%2098584',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 8, water: 8, peace: 7, drive: 9 },
   },
@@ -121,6 +125,8 @@ export const campgrounds: Campground[] = [
     bestFor: ['Hot summer weather', 'Swimming', 'Kids', 'Fishing', 'Peace and quiet'],
     image: 'https://images.unsplash.com/photo-1719543197944-c91701169658?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXJsZXclMjBsYWtlJTIwd2FzaGluZ3RvbnxlbnwxfHx8fDE3NzQ1OTQ0ODF8MA&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=62%20State%20Park%20Road%2C%20Republic%2C%20WA%2099166',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 8, water: 8, peace: 8, drive: 2 },
   },
@@ -161,6 +167,8 @@ export const campgrounds: Campground[] = [
     bestFor: ['Unique scenery', 'Photography', 'Geology lovers', 'Hot weather', 'Swimming'],
     image: 'https://images.unsplash.com/photo-1641667408229-edb68be87983?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdW4lMjBsYWtlcyUyMHN0YXRlJTIwcGFya3xlbnwxfHx8fDE3NzQ1OTQ0ODF8MA&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=34875%20Park%20Lake%20Road%20NE%2C%20Coulee%20City%2C%20WA%2099115',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 10, water: 7, peace: 6, drive: 5 },
   },
@@ -202,6 +210,8 @@ export const campgrounds: Campground[] = [
     bestFor: ['Forest lovers', 'Families', 'Classic PNW vibes', 'River activities'],
     image: 'https://images.unsplash.com/photo-1639050154816-bced01e66bfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXJhZGlzZSUyMHBvaW50JTIwc3RhdGUlMjBwYXJrJTIwd2FzaGluZ3RvbnxlbnwxfHx8fDE3NzQ1OTQ0ODV8MA&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=33914%20NW%20Paradise%20Park%20Road%2C%20Ridgefield%2C%20WA%2098642',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 6, water: 8, peace: 4, drive: 4 },
   },
@@ -241,6 +251,8 @@ export const campgrounds: Campground[] = [
     bestFor: ['Fishing enthusiasts', 'Boating', 'Hot weather lovers', 'Water sports'],
     image: 'https://images.unsplash.com/photo-1500498036565-cdf5d84e5393?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXNlcnQlMjBjYW1waW5nJTIwd2FzaGluZ3RvbnxlbnwxfHx8fDE3NzQ1OTQ0ODB8MA&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=6762%20Highway%20262%20East%2C%20Othello%2C%20WA%2099344',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 6, water: 8, peace: 5, drive: 6 },
   },
@@ -281,6 +293,7 @@ export const campgrounds: Campground[] = [
     bestFor: ['Comfort camping', 'River access', 'Families with young kids', 'Convenience'],
     image: 'https://images.unsplash.com/photo-1571288622450-c87742110238?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2x1bWJpYSUyMHJpdmVyJTIwY2FtcGluZ3xlbnwxfHx8fDE3NzQ1OTQ0ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl: 'https://maps.app.goo.gl/6y2x9KCiPrsKFYWm6',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 8, water: 7, peace: 5, drive: 7 },
   },
@@ -321,6 +334,8 @@ export const campgrounds: Campground[] = [
     bestFor: ['History buffs', 'Peace and quiet', 'Shade seekers', 'Nature lovers'],
     image: 'https://images.unsplash.com/photo-1734903251897-032952a97fd4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbmFrZSUyMHJpdmVyJTIwY2FtcGluZ3xlbnwxfHx8fDE3NzQ1OTQ0ODh8MA&ixlib=rb-4.1.0&q=80&w=1080',
     bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=36149%20Highway%2012%2C%20Dayton%2C%20WA%2099328',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 7, water: 6, peace: 8, drive: 2 },
   },

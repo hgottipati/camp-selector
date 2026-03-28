@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { campgrounds, type Campground } from '../data/campgrounds';
-import { MapPin, Clock, Star, Thermometer, Waves, ChevronRight, CalendarRange, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, Star, Thermometer, Waves, ChevronRight, CalendarRange, ExternalLink, Map } from 'lucide-react';
 import { useInterestWeights } from '../context/InterestWeightsContext';
 import { useTripDates } from '../context/TripDatesContext';
 import { computeMatchScore } from '../lib/interestWeights';
@@ -12,6 +12,7 @@ import { InterestWeightsPanel } from '../components/InterestWeightsPanel';
 import { LokiMatchScore } from '../components/LokiMatchBrand';
 import { FederalCampgroundSearch } from '../components/FederalCampgroundSearch';
 import { buildWaGoingToCampResultsUrl } from '../lib/waGoingToCamp';
+import { resolveCampgroundMapsUrl } from '../lib/googleMapsUrl';
 
 type RegionFilter = 'all' | Campground['region'];
 type SourceTab = 'wa' | 'federal';
@@ -201,6 +202,7 @@ export default function Home() {
       <div className="grid md:grid-cols-2 gap-6">
         {filteredCampgrounds.map((campground) => {
           const waAvailUrl = buildWaGoingToCampResultsUrl(startDate, endDate);
+          const mapsUrl = resolveCampgroundMapsUrl(campground);
           return (
             <div
               key={campground.id}
@@ -278,15 +280,27 @@ export default function Home() {
                   >
                     View Details <ChevronRight className="w-4 h-4" />
                   </Link>
-                  <a
-                    href={waAvailUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
-                  >
-                    Check availability
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                    >
+                      <Map className="h-4 w-4 text-blue-600" aria-hidden />
+                      Google Maps
+                      <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                    </a>
+                    <a
+                      href={waAvailUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+                    >
+                      Check availability
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </div>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
                   Opens Washington GoingToCamp with your trip dates prefilled (state reservation system).
