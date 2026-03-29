@@ -10,6 +10,8 @@ export type TripDatesState = {
   endDate: string;
   setStartDate: (v: string) => void;
   setEndDate: (v: string) => void;
+  /** Set both dates in one update (check-in and checkout). */
+  setTripRange: (checkInYmd: string, checkoutYmd: string) => void;
 };
 
 const TripDatesContext = createContext<TripDatesState | null>(null);
@@ -34,14 +36,23 @@ export function TripDatesProvider({ children }: { children: ReactNode }) {
     [startDate],
   );
 
+  const setTripRange = useCallback((checkInYmd: string, checkoutYmd: string) => {
+    const a = checkInYmd <= checkoutYmd ? checkInYmd : checkoutYmd;
+    const b = checkInYmd <= checkoutYmd ? checkoutYmd : checkInYmd;
+    const checkoutSafe = b <= a ? ymdAddDays(a, 1) : b;
+    setStartDate(a);
+    setEndDate(checkoutSafe);
+  }, []);
+
   const value = useMemo(
     () => ({
       startDate,
       endDate,
       setStartDate: setStartDateSafe,
       setEndDate: setEndDateSafe,
+      setTripRange,
     }),
-    [startDate, endDate, setStartDateSafe, setEndDateSafe],
+    [startDate, endDate, setStartDateSafe, setEndDateSafe, setTripRange],
   );
 
   return <TripDatesContext.Provider value={value}>{children}</TripDatesContext.Provider>;

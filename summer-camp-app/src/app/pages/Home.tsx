@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { campgrounds, type Campground } from '../data/campgrounds';
-import { MapPin, Clock, Star, Thermometer, Waves, ChevronRight, CalendarRange, ExternalLink } from 'lucide-react';
+import { campgrounds } from '../data/campgrounds';
+import { MapPin, Clock, Star, Thermometer, Waves, ChevronRight, ExternalLink } from 'lucide-react';
+import { CampSearchPillBar, type RegionFilter } from '../components/CampSearchPillBar';
 import { useInterestWeights } from '../context/InterestWeightsContext';
 import { useTripDates } from '../context/TripDatesContext';
 import { computeMatchScore } from '../lib/interestWeights';
@@ -12,14 +13,14 @@ import { InterestWeightsPanel } from '../components/InterestWeightsPanel';
 import { LokiMatchScore } from '../components/LokiMatchBrand';
 import { FederalCampgroundSearch } from '../components/FederalCampgroundSearch';
 import { buildWaGoingToCampResultsUrl } from '../lib/waGoingToCamp';
-type RegionFilter = 'all' | Campground['region'];
+
 type SourceTab = 'wa' | 'federal';
 
 export default function Home() {
   const [sourceTab, setSourceTab] = useState<SourceTab>('wa');
   const [selectedRegion, setSelectedRegion] = useState<RegionFilter>('all');
   const { weights } = useInterestWeights();
-  const { startDate, endDate, setStartDate, setEndDate } = useTripDates();
+  const { startDate, endDate } = useTripDates();
 
   const regionCounts = useMemo(
     () => ({
@@ -70,36 +71,16 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white/90 p-5 shadow-sm ring-1 ring-gray-100">
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-gray-800">
-          <CalendarRange className="h-5 w-5 text-green-600" aria-hidden />
-          <h3 className="text-lg font-bold">Trip dates (shared)</h3>
-          <span className="text-sm text-gray-600">
-            Check-in through checkout (checkout day is departure, not a camping night) — matches GoingToCamp and the
-            night count shown on detail pages.
-          </span>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Check-in
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Checkout
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
-            />
-          </label>
-        </div>
-      </div>
+      <CampSearchPillBar
+        sourceTab={sourceTab}
+        selectedRegion={selectedRegion}
+        onRegionChange={setSelectedRegion}
+        regionCounts={regionCounts}
+        totalCampgrounds={campgrounds.length}
+        onSearchClick={() =>
+          document.getElementById('campground-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      />
 
       <div className="mb-6 flex flex-wrap gap-2">
         <button
@@ -129,76 +110,15 @@ export default function Home() {
       </div>
 
       {sourceTab === 'wa' && (
-        <div className="mb-8">
-          <InterestWeightsPanel />
-          <p className="mt-3 text-center text-sm text-gray-600">
-            Cards below are sorted by <strong>Loki Match</strong> (highest first) and reshuffle when you move the sliders.
-          </p>
-        </div>
-      )}
-
-      {sourceTab === 'wa' && (
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <button
-          type="button"
-          onClick={() => setSelectedRegion('all')}
-          className={`px-5 py-2.5 rounded-lg transition ${
-            selectedRegion === 'all'
-              ? 'bg-green-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-          }`}
-        >
-          All regions ({campgrounds.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedRegion('NW')}
-          className={`px-5 py-2.5 rounded-lg transition ${
-            selectedRegion === 'NW'
-              ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-          }`}
-        >
-          Northwest 🌲 ({regionCounts.NW})
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedRegion('NE')}
-          className={`px-5 py-2.5 rounded-lg transition ${
-            selectedRegion === 'NE'
-              ? 'bg-yellow-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-          }`}
-        >
-          Northeast ☀️ ({regionCounts.NE})
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedRegion('SW')}
-          className={`px-5 py-2.5 rounded-lg transition ${
-            selectedRegion === 'SW'
-              ? 'bg-green-700 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-          }`}
-        >
-          Southwest 🌳 ({regionCounts.SW})
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedRegion('SE')}
-          className={`px-5 py-2.5 rounded-lg transition ${
-            selectedRegion === 'SE'
-              ? 'bg-orange-600 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-          }`}
-        >
-          Southeast 🏜️ ({regionCounts.SE})
-        </button>
-      </div>
-      )}
-
-      {sourceTab === 'wa' && (
-      <div className="grid md:grid-cols-2 gap-6">
+        <div id="campground-results" className="scroll-mt-24 space-y-8">
+          <div>
+            <InterestWeightsPanel />
+            <p className="mt-3 text-center text-sm text-gray-600">
+              Cards below are sorted by <strong>Loki Match</strong> (highest first) and reshuffle when you move the
+              sliders.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
         {filteredCampgrounds.map((campground) => {
           const waAvailUrl = buildWaGoingToCampResultsUrl(startDate, endDate);
           return (
@@ -297,10 +217,15 @@ export default function Home() {
             </div>
           );
         })}
-      </div>
+          </div>
+        </div>
       )}
 
-      {sourceTab === 'federal' && <FederalCampgroundSearch />}
+      {sourceTab === 'federal' && (
+        <div id="campground-results" className="scroll-mt-24">
+          <FederalCampgroundSearch />
+        </div>
+      )}
 
       {/* Bottom CTA */}
       <div className="mt-12 bg-blue-100 rounded-2xl p-8 text-center">

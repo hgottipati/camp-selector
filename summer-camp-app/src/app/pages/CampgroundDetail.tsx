@@ -28,6 +28,7 @@ import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
 import { deriveItineraryForNights } from '../lib/deriveSampleItinerary';
 import { countTripNights } from '../lib/ymd';
+import { TripDateRangePicker } from '../components/TripDateRangePicker';
 
 function formatTripYmd(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number);
@@ -41,7 +42,7 @@ function formatTripYmd(ymd: string): string {
 export default function CampgroundDetail() {
   const { id } = useParams();
   const { weights } = useInterestWeights();
-  const { startDate, endDate, setStartDate, setEndDate } = useTripDates();
+  const { startDate, endDate } = useTripDates();
   const campground = campgrounds.find((c) => c.id === id);
   const waGoingToCampUrl = buildWaGoingToCampResultsUrl(startDate, endDate);
 
@@ -321,26 +322,7 @@ export default function CampgroundDetail() {
                 <CalendarRange className="h-4 w-4 text-green-600" aria-hidden />
                 Trip dates (same as home page — drives sample itinerary when this park has one)
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <label className="flex flex-col gap-0.5 text-xs text-gray-600">
-                  Check-in
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="rounded border border-gray-200 px-2 py-1 text-gray-900"
-                  />
-                </label>
-                <label className="flex flex-col gap-0.5 text-xs text-gray-600">
-                  Checkout
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="rounded border border-gray-200 px-2 py-1 text-gray-900"
-                  />
-                </label>
-              </div>
+              <TripDateRangePicker variant="compact" className="border-gray-200 bg-white" />
             </div>
 
             <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">

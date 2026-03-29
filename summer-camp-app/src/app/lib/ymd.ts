@@ -1,6 +1,14 @@
-function parseYmdLocal(ymd: string): Date {
+export function parseYmdLocal(ymd: string): Date {
   const [y, m, d] = ymd.split('-').map(Number);
   return new Date(y, m - 1, d);
+}
+
+/** Local calendar date as YYYY-MM-DD (for date pickers; avoids UTC shift). */
+export function ymdFromDateLocal(d: Date): string {
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${mo}-${day}`;
 }
 
 export function ymdAddDays(ymd: string, deltaDays: number): string {

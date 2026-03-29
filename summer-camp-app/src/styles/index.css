@@ -1,2 +1,13 @@
 @import './tailwind.css';
 @import './theme.css';
+@import 'react-day-picker/dist/style.css';
+
+/* Saved trip hint before user starts a new range (TripDateRangePicker) */
+.rdp .trip-saved-span:not([disabled]) {
+  background-color: rgb(243 244 246);
+  color: rgb(55 65 81);
+  font-weight: 500;
+}
+.rdp .trip-saved-span:not([disabled]):hover {
+  background-color: rgb(229 231 235);
+}
