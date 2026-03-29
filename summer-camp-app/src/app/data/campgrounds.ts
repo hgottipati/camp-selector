@@ -339,4 +339,49 @@ export const campgrounds: Campground[] = [
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 7, water: 6, peace: 8, drive: 2 },
   },
+  {
+    id: 'daroga',
+    name: 'Daroga State Park',
+    region: 'NE',
+    latitude: 47.7092,
+    longitude: -120.2022,
+    distanceFromBothell: 155,
+    driveTime: '3 hours',
+    terrain:
+      'Columbia River country off Highway 97 — a green, irrigated oasis of lawns, lagoon, and shade trees surrounded by dry, rolling sage-steppe hills.',
+    waterAccess: {
+      available: true,
+      type: 'Park lagoon (calm swim area) + Columbia River access (boat ramps, docks)',
+      temperature:
+        'July–August: the park’s shallow lagoon often warms into the high 60s–mid 70s °F on hot weeks — beginner-friendly for wading and paddling. Columbia main channel feels cooler and has current; treat it like big-river water, not a pool.',
+    },
+    scenicRating: 4.5,
+    commercialLevel: 'Developed — hookups, sports courts, boat facilities',
+    activities: [
+      'Swimming (designated lagoon area)',
+      'Kayaking & paddleboarding',
+      'Boating (two ramps, docks, moorage with camping)',
+      'Fishing',
+      'Hiking & walking trails',
+      'Biking',
+      'Sports (tennis, basketball, volleyball, playgrounds)',
+      'Bird and wildlife viewing',
+    ],
+    description:
+      'Central Washington’s Daroga is a full-featured state park between Wenatchee and the Methow — big lawns, a sheltered lagoon for easy swimming, and Columbia River boating steps away. Great when you want water fun and real amenities without the west-side drizzle. Walk-in and boat-in sites add adventure if you don’t need an RV pad at the loop.',
+    proTips: [
+      'Walk-in and boat-in sites can be up to ~½ mile from parking — pack light or use park wheelbarrows when available',
+      'Overnight moorage is an add-on fee when paired with a land reservation — check current rates',
+      'Gates and camping follow seasonal schedules; confirm winter closure before you go',
+      'Discover Pass required; Chelan PUD customers may use a PUD day-use pass in place of Discover Pass (see park rules)',
+    ],
+    bestFor: ['Families', 'Boating', 'Swimming', 'Sports & playgrounds', 'Central WA road trips'],
+    image:
+      'https://images.unsplash.com/photo-1501785888041-af3ef285b470?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    bookingUrl: 'https://washington.goingtocamp.com/create-booking/results',
+    googleMapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=1%20S%20Daroga%20Park%20Lane%2C%20Orondo%2C%20WA%2098843',
+    season: ['July', 'August', 'September'],
+    matchScores: { scenery: 8, water: 8, peace: 6, drive: 6 },
+  },
 ];
