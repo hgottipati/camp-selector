@@ -16,12 +16,11 @@ import {
   Lightbulb,
   Activity,
   CalendarRange,
-  Map,
 } from 'lucide-react';
 import { useInterestWeights } from '../context/InterestWeightsContext';
 import { useTripDates } from '../context/TripDatesContext';
 import { buildWaGoingToCampResultsUrl } from '../lib/waGoingToCamp';
-import { resolveCampgroundMapsUrl } from '../lib/googleMapsUrl';
+import { GoogleMapsEmbed } from '../components/GoogleMapsEmbed';
 import { computeMatchScore } from '../lib/interestWeights';
 import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
@@ -43,8 +42,6 @@ export default function CampgroundDetail() {
       </div>
     );
   }
-
-  const googleMapsUrl = resolveCampgroundMapsUrl(campground);
 
   const regionColors = {
     NW: 'bg-blue-600',
@@ -153,6 +150,22 @@ export default function CampgroundDetail() {
           <p className="text-lg font-bold text-gray-900">{campground.bestFor[0]}</p>
           <p className="text-sm text-gray-500">+ {campground.bestFor.length - 1} more</p>
         </div>
+      </div>
+
+      <div className="mb-8">
+        <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">Location</h2>
+            <p className="text-sm text-gray-600">
+              Google Maps embedded here — no need to leave this page. Pin uses campground coordinates.
+            </p>
+          </div>
+        </div>
+        <GoogleMapsEmbed
+          latitude={campground.latitude}
+          longitude={campground.longitude}
+          title={`Map of ${campground.name}`}
+        />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -277,16 +290,6 @@ export default function CampgroundDetail() {
             </div>
 
             <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <a
-                href={googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex flex-1 min-w-[10rem] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
-              >
-                <Map className="h-4 w-4 shrink-0 text-blue-600" aria-hidden />
-                Google Maps
-                <ExternalLink className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-              </a>
               <a
                 href={waGoingToCampUrl}
                 target="_blank"
