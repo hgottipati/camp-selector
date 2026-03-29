@@ -11,6 +11,7 @@ import {
   recreationSearchCampgrounds,
   type RecreationSearchHit,
 } from '../lib/recreationApi';
+import { lastCampingNightYmd } from '../lib/ymd';
 import { useTripDates } from '../context/TripDatesContext';
 import { ExternalLink, Loader2, MapPin, Search, Tent } from 'lucide-react';
 
@@ -46,6 +47,7 @@ async function mapWithConcurrency<T>(items: T[], limit: number, fn: (item: T, in
 
 export function FederalCampgroundSearch() {
   const { startDate, endDate } = useTripDates();
+  const lastCampingNight = useMemo(() => lastCampingNightYmd(endDate), [endDate]);
   const [query, setQuery] = useState('Washington');
   const [onlyWa, setOnlyWa] = useState(true);
   const [siteType, setSiteType] = useState('');
@@ -96,7 +98,11 @@ export function FederalCampgroundSearch() {
 
       await mapWithConcurrency(base, 4, async (hit) => {
         try {
-          const { merged, nights } = await fetchAvailabilityForStay(hit.facilityId, startDate, endDate);
+          const { merged, nights } = await fetchAvailabilityForStay(
+            hit.facilityId,
+            startDate,
+            lastCampingNight,
+          );
           const availableSites = countSitesAvailableAllNights(merged, nights, typeFilter);
           const nyrOnly =
             availableSites === 0 && hasAllNightsNotYetReleased(merged, nights, typeFilter);
@@ -135,7 +141,7 @@ export function FederalCampgroundSearch() {
     } finally {
       setLoadingSearch(false);
     }
-  }, [query, onlyWa, startDate, endDate, typeFilter]);
+  }, [query, onlyWa, startDate, lastCampingNight, typeFilter]);
 
   return (
     <div className="space-y-6">
@@ -145,7 +151,8 @@ export function FederalCampgroundSearch() {
             Recreation.gov
           </span>
           <p className="text-sm text-gray-700">
-            Federal campgrounds with live availability for your nights (first night → last night). Not all Washington
+            Federal campgrounds with live availability for every camping night (check-in through night before checkout).
+            Not all Washington
             parks are on Recreation.gov — use the <strong className="text-emerald-800">WA State</strong> tab for those.
           </p>
         </div>
@@ -200,9 +207,9 @@ export function FederalCampgroundSearch() {
         </div>
 
         <p className="mt-3 rounded-lg bg-white/60 px-3 py-2 text-xs text-gray-700 ring-1 ring-amber-100">
-          <strong className="text-gray-900">Dates:</strong> use the <em>last night you sleep in camp</em>, not the
-          morning you leave. Example: arrive Friday, leave Monday → first night Friday, <strong>last night Sunday</strong>{' '}
-          (not Monday).
+          <strong className="text-gray-900">Dates:</strong> match the home page — <strong>Checkout</strong> is the
+          morning you leave (not a camping night). Example: arrive Friday, leave Monday → checkout <strong>Monday</strong>
+          ; we check availability for Friday through Sunday nights.
         </p>
         <p className="mt-3 text-xs text-gray-500">
           Data from Recreation.gov — see{' '}
@@ -225,7 +232,7 @@ export function FederalCampgroundSearch() {
       {hits.length > 0 && availabilityPending && (
         <div className="flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-          Checking campgrounds for sites free every night ({startDate} → {endDate})…
+          Checking campgrounds for sites free every night ({startDate} → {lastCampingNight}; checkout {endDate})…
         </div>
       )}
 
@@ -301,12 +308,12 @@ export function FederalCampgroundSearch() {
           <p className="mt-2 text-sm">
             We only count nights the API marks as <strong>Available</strong> for online reservation (same data
             recreation.gov uses for the booking grid). None of the campgrounds we checked had a site matching your
-            filters for <strong>every</strong> night from {startDate} through {endDate}.
+            filters for <strong>every</strong> camping night from {startDate} through {lastCampingNight} (checkout{' '}
+            {endDate}).
           </p>
           <ul className="mx-auto mt-3 max-w-lg list-disc space-y-1 pl-5 text-left text-sm">
             <li>
-              Shorten the stay or fix the date range (an extra &quot;last night&quot; is a common mix-up — see note
-              above).
+              Shorten the stay or fix the date range (checkout vs. last night in camp — see note above).
             </li>
             <li>
               Set <strong>Site type</strong> to &quot;Any site type&quot; unless you need a specific hookup.

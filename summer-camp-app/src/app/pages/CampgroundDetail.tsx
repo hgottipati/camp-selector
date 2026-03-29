@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { campgrounds } from '../data/campgrounds';
 import {
@@ -16,6 +17,7 @@ import {
   Lightbulb,
   Activity,
   CalendarRange,
+  ListOrdered,
 } from 'lucide-react';
 import { useInterestWeights } from '../context/InterestWeightsContext';
 import { useTripDates } from '../context/TripDatesContext';
@@ -24,6 +26,17 @@ import { GoogleMapsEmbed } from '../components/GoogleMapsEmbed';
 import { computeMatchScore } from '../lib/interestWeights';
 import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
+import { deriveItineraryForNights } from '../lib/deriveSampleItinerary';
+import { countTripNights } from '../lib/ymd';
+
+function formatTripYmd(ymd: string): string {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
 export default function CampgroundDetail() {
   const { id } = useParams();
@@ -31,6 +44,12 @@ export default function CampgroundDetail() {
   const { startDate, endDate, setStartDate, setEndDate } = useTripDates();
   const campground = campgrounds.find((c) => c.id === id);
   const waGoingToCampUrl = buildWaGoingToCampResultsUrl(startDate, endDate);
+
+  const tripNights = useMemo(() => countTripNights(startDate, endDate), [startDate, endDate]);
+  const derivedItinerary = useMemo(() => {
+    if (!campground?.sampleItinerary) return null;
+    return deriveItineraryForNights(campground.sampleItinerary, tripNights);
+  }, [campground, tripNights]);
 
   if (!campground) {
     return (
@@ -173,6 +192,45 @@ export default function CampgroundDetail() {
             <p className="text-gray-700 text-lg leading-relaxed">{campground.description}</p>
           </div>
 
+          {derivedItinerary && campground.sampleItinerary && (
+            <div className="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-6 shadow-md">
+              <div className="mb-4 flex flex-wrap items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
+                  <ListOrdered className="h-5 w-5" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
+                    Your dates · Check-in {formatTripYmd(startDate)} · Checkout {formatTripYmd(endDate)} · {tripNights}{' '}
+                    night{tripNights === 1 ? '' : 's'}
+                  </p>
+                  <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">{campground.sampleItinerary.title}</h2>
+                  <p className="mt-1 text-sm font-medium text-sky-800">{derivedItinerary.hint}</p>
+                  {campground.sampleItinerary.blurb && (
+                    <p className="mt-2 text-sm leading-relaxed text-gray-600">{campground.sampleItinerary.blurb}</p>
+                  )}
+                </div>
+              </div>
+              <ol className="space-y-6">
+                {derivedItinerary.days.map((day) => (
+                  <li key={day.label}>
+                    <h3 className="mb-2 font-semibold text-gray-900">{day.label}</h3>
+                    <ul className="space-y-2 border-l-2 border-sky-200 pl-4">
+                      {day.items.map((item, idx) => (
+                        <li key={`${day.label}-${idx}`} className="text-sm leading-relaxed text-gray-700">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-4 text-xs text-gray-500">
+                Change <strong>Check-in</strong> / <strong>Checkout</strong> in the sidebar — this outline updates
+                automatically (same dates as GoingToCamp).
+              </p>
+            </div>
+          )}
+
           {/* Terrain */}
           <div className="bg-white rounded-xl p-6 shadow-md">
             <div className="flex items-center gap-3 mb-4">
@@ -261,11 +319,11 @@ export default function CampgroundDetail() {
             <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
               <div className="mb-2 flex items-center gap-2 font-medium text-gray-900">
                 <CalendarRange className="h-4 w-4 text-green-600" aria-hidden />
-                Trip dates (same as home page)
+                Trip dates (same as home page — drives sample itinerary when this park has one)
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <label className="flex flex-col gap-0.5 text-xs text-gray-600">
-                  First night
+                  Check-in
                   <input
                     type="date"
                     value={startDate}
@@ -274,7 +332,7 @@ export default function CampgroundDetail() {
                   />
                 </label>
                 <label className="flex flex-col gap-0.5 text-xs text-gray-600">
-                  Last night
+                  Checkout
                   <input
                     type="date"
                     value={endDate}

@@ -16,6 +16,20 @@ export interface MatchScores {
   drive: number;
 }
 
+/** Optional trip sketch for the detail page (not a booking — just ideas). */
+export interface SampleItineraryDay {
+  label: string;
+  items: string[];
+}
+
+export interface SampleItinerary {
+  title: string;
+  nights: number;
+  /** Short intro under the title */
+  blurb?: string;
+  days: SampleItineraryDay[];
+}
+
 export interface Campground {
   id: string;
   name: string;
@@ -42,6 +56,7 @@ export interface Campground {
   googleMapsUrl?: string;
   season: string[];
   matchScores: MatchScores;
+  sampleItinerary?: SampleItinerary;
 }
 
 export const campgrounds: Campground[] = [
@@ -383,5 +398,39 @@ export const campgrounds: Campground[] = [
       'https://www.google.com/maps/search/?api=1&query=1%20S%20Daroga%20Park%20Lane%2C%20Orondo%2C%20WA%2098843',
     season: ['July', 'August', 'September'],
     matchScores: { scenery: 8, water: 8, peace: 6, drive: 6 },
+    sampleItinerary: {
+      title: 'Sample 2-night trip + Lake Chelan day',
+      nights: 2,
+      blurb:
+        'Use Daroga as base camp: lagoon and river at the park, then one full day on Lake Chelan (~50–60 min drive). Tweak times for reservations, weekend traffic, and your group’s pace — this is a sketch, not a schedule.',
+      days: [
+        {
+          label: 'Day 1 — Arrive & park day',
+          items: [
+            'Leave Bothell mid-morning (~3 hr to Daroga); check in and set up camp.',
+            'Afternoon: swim in the park lagoon, hit the playground or sports courts, or walk the easy park trails.',
+            'Evening: cook at the site; stroll the Columbia shoreline or lagoon after dinner — keep it light after the drive.',
+          ],
+        },
+        {
+          label: 'Day 2 — Lake Chelan day trip',
+          items: [
+            'Breakfast at camp or grab something in Orondo / Wenatchee on the way.',
+            'Drive to Chelan (or Manson): public beaches like Don Morse Park or Lakeside Park for swimming; rent kayaks or SUP if you want on-water time without a big boat.',
+            'Lunch in downtown Chelan or Manson.',
+            'Afternoon picks: scenic boat ride or rental (if budget fits); Manson tasting rooms for 21+; Slidewaters for families; or more beach and ice cream in town.',
+            'Head back to Daroga for dinner and a calm evening — east-side stars are hard to beat.',
+          ],
+        },
+        {
+          label: 'Day 3 — Pack up',
+          items: [
+            'Slow morning: coffee, optional quick dip in the lagoon or short walk.',
+            'Break camp, dump if needed, and roll out.',
+            'Optional stops southbound: Wenatchee riverfront / Pybus Market, or a fruit stand on US-97.',
+          ],
+        },
+      ],
+    },
   },
 ];

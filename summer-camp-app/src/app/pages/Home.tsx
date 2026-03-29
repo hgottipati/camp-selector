@@ -75,12 +75,13 @@ export default function Home() {
           <CalendarRange className="h-5 w-5 text-green-600" aria-hidden />
           <h3 className="text-lg font-bold">Trip dates (shared)</h3>
           <span className="text-sm text-gray-600">
-            First night through last night — used for WA GoingToCamp links and Recreation.gov availability.
+            Check-in through checkout (checkout day is departure, not a camping night) — matches GoingToCamp and the
+            night count shown on detail pages.
           </span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            First night
+            Check-in
             <input
               type="date"
               value={startDate}
@@ -89,7 +90,7 @@ export default function Home() {
             />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Last night
+            Checkout
             <input
               type="date"
               value={endDate}
