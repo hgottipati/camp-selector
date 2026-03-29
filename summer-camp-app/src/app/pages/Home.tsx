@@ -12,6 +12,7 @@ import { waterTemperaturePreview } from '../lib/waterDisplay';
 import { InterestWeightsPanel } from '../components/InterestWeightsPanel';
 import { LokiMatchScore } from '../components/LokiMatchBrand';
 import { FederalCampgroundSearch } from '../components/FederalCampgroundSearch';
+import { ShareListingButton } from '../components/ShareListingButton';
 import { buildWaGoingToCampResultsUrl } from '../lib/waGoingToCamp';
 
 type SourceTab = 'wa' | 'federal';
@@ -199,6 +200,12 @@ export default function Home() {
                     View Details <ChevronRight className="w-4 h-4" />
                   </Link>
                   <div className="flex flex-wrap items-center justify-end gap-2">
+                    <ShareListingButton
+                      href={`/campground/${campground.id}`}
+                      title={campground.name}
+                      text={`${campground.name} — WA campground pick`}
+                      compact
+                    />
                     <a
                       href={waAvailUrl}
                       target="_blank"

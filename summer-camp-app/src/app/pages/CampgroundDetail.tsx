@@ -29,6 +29,7 @@ import { LOKI_MATCH_NAME } from '../components/LokiMatchBrand';
 import { deriveItineraryForNights } from '../lib/deriveSampleItinerary';
 import { countTripNights } from '../lib/ymd';
 import { TripDateRangePicker } from '../components/TripDateRangePicker';
+import { ShareListingButton } from '../components/ShareListingButton';
 
 function formatTripYmd(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number);
@@ -72,14 +73,21 @@ export default function CampgroundDetail() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Back Button */}
-      <Link
-        to="/"
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to all campgrounds
-      </Link>
+      {/* Back + share */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-gray-600 transition hover:text-gray-900"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to all campgrounds
+        </Link>
+        <ShareListingButton
+          href={`/campground/${campground.id}`}
+          title={campground.name}
+          text={`${campground.name} — Washington campground`}
+        />
+      </div>
 
       {/* Hero Image */}
       <div className="relative h-96 rounded-2xl overflow-hidden shadow-xl mb-8">

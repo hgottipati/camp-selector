@@ -14,6 +14,7 @@ import {
 import { lastCampingNightYmd } from '../lib/ymd';
 import { useTripDates } from '../context/TripDatesContext';
 import { ExternalLink, Loader2, MapPin, Search, Tent } from 'lucide-react';
+import { ShareListingButton } from './ShareListingButton';
 
 type EnrichedHit = RecreationSearchHit & {
   facilityId: string;
@@ -272,14 +273,21 @@ export function FederalCampgroundSearch() {
                     ~{n} site{n === 1 ? '' : 's'} available every night (with your site-type filter)
                   </p>
                   <div className="mt-auto flex flex-wrap gap-2 pt-1">
+                    <ShareListingButton
+                      href={bookUrl}
+                      title={hit.name}
+                      text={`${hit.name} — Recreation.gov`}
+                      compact
+                      className="border-amber-200 bg-amber-50/80 text-amber-950 hover:bg-amber-100"
+                    />
                     <a
                       href={bookUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-amber-700"
+                      className="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-amber-700"
                     >
                       View & book on Recreation.gov
-                      <ExternalLink className="h-4 w-4" />
+                      <ExternalLink className="h-4 w-4 shrink-0" />
                     </a>
                   </div>
                 </div>

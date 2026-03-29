@@ -10,6 +10,7 @@ import { Star, MapPin, Clock, Navigation, Sparkles } from "lucide-react";
 import { useInterestWeights } from "../context/InterestWeightsContext";
 import { computeMatchScore } from "../lib/interestWeights";
 import { LOKI_MATCH_NAME } from "../components/LokiMatchBrand";
+import { ShareListingButton } from "../components/ShareListingButton";
 
 const BOTHELL: L.LatLngExpression = [47.7593, -122.2054];
 
@@ -200,13 +201,22 @@ export default function MapView() {
                     <span>{selectedCampground.driveTime}</span>
                   </div>
                 </div>
-                <Link
-                  to={`/campground/${selectedCampground.id}`}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
-                >
-                  View full details
-                  <Navigation className="h-4 w-4" />
-                </Link>
+                <div className="flex gap-2">
+                  <ShareListingButton
+                    href={`/campground/${selectedCampground.id}`}
+                    title={selectedCampground.name}
+                    text={`${selectedCampground.name} — on the campground map`}
+                    compact
+                    className="shrink-0"
+                  />
+                  <Link
+                    to={`/campground/${selectedCampground.id}`}
+                    className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+                  >
+                    View full details
+                    <Navigation className="h-4 w-4 shrink-0" />
+                  </Link>
+                </div>
               </div>
             </div>
           )}
@@ -288,13 +298,22 @@ export default function MapView() {
                 </div>
               </div>
 
-              <Link
-                to={`/campground/${campground.id}`}
-                className="mt-3 inline-block text-sm text-green-600 hover:text-green-700 hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View details →
-              </Link>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Link
+                  to={`/campground/${campground.id}`}
+                  className="text-sm text-green-600 hover:text-green-700 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  View details →
+                </Link>
+                <span onClick={(e) => e.stopPropagation()} className="inline-flex">
+                  <ShareListingButton
+                    href={`/campground/${campground.id}`}
+                    title={campground.name}
+                    compact
+                  />
+                </span>
+              </div>
             </button>
           ))}
         </div>

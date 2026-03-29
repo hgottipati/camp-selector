@@ -1,0 +1,2 @@
+# SPA fallback: real files (e.g. /campground/:id/index.html) are served first.
+/*    /index.html   200
