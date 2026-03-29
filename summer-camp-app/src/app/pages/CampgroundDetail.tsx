@@ -157,15 +157,11 @@ export default function CampgroundDetail() {
           <div>
             <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">Location</h2>
             <p className="text-sm text-gray-600">
-              Google Maps embedded here — no need to leave this page. Pin uses campground coordinates.
+              Google Maps embedded here — no need to leave this page. Map search uses the park name (Washington, USA).
             </p>
           </div>
         </div>
-        <GoogleMapsEmbed
-          latitude={campground.latitude}
-          longitude={campground.longitude}
-          title={`Map of ${campground.name}`}
-        />
+        <GoogleMapsEmbed parkName={campground.name} title={`Map of ${campground.name}`} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">

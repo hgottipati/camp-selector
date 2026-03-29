@@ -1,15 +1,15 @@
-import { googleMapsEmbedSrc } from '../lib/googleMapsUrl';
+import { googleMapsEmbedSrc, googleMapsPlaceQuery } from '../lib/googleMapsUrl';
 import { cn } from './ui/utils';
 
 type GoogleMapsEmbedProps = {
-  latitude: number;
-  longitude: number;
+  /** Official listing name (e.g. “Potlatch State Park”); embedded map searches by name in Washington. */
+  parkName: string;
   title: string;
   className?: string;
 };
 
-export function GoogleMapsEmbed({ latitude, longitude, title, className }: GoogleMapsEmbedProps) {
-  const src = googleMapsEmbedSrc({ latitude, longitude });
+export function GoogleMapsEmbed({ parkName, title, className }: GoogleMapsEmbedProps) {
+  const src = googleMapsEmbedSrc({ placeQuery: googleMapsPlaceQuery(parkName) });
 
   return (
     <div
