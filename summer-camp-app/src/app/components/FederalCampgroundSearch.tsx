@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   countSitesAvailableAllNights,
   fetchAvailabilityForStay,
+  hasAllNightsNotYetReleased,
   hitStateCodes,
   parseFacilityIdFromSearchId,
   recreationCampingUrl,
@@ -18,6 +19,8 @@ type EnrichedHit = RecreationSearchHit & {
   availableSites: number | null;
   loadingAvailability: boolean;
   availabilityError?: string;
+  /** API had NYR for all nights (not yet released), no reservable slot in payload */
+  nyrOnly?: boolean;
 };
 
 const CAMPSITE_TYPES = [
@@ -62,16 +65,27 @@ export function FederalCampgroundSearch() {
 
   const availabilityPending = hits.some((h) => h.loadingAvailability);
   const availabilityDone = hits.length > 0 && !availabilityPending;
+  const availabilityErrors = useMemo(() => hits.filter((h) => h.availabilityError), [hits]);
+  const allAvailabilityFailed =
+    availabilityDone && hits.length > 0 && availabilityErrors.length === hits.length;
 
   const runSearch = useCallback(async () => {
     setLoadingSearch(true);
     setSearchError(null);
     try {
-      const data = await recreationSearchCampgrounds({ q: query.trim() || 'Washington', size: 24, start: 0 });
+      // When filtering to WA, fetch many more rows first — the API mixes in other states, so 24 total can yield almost no WA campgrounds to check.
+      const fetchSize = onlyWa ? 120 : 48;
+      const maxToCheck = 28;
+      const data = await recreationSearchCampgrounds({
+        q: query.trim() || 'Washington',
+        size: fetchSize,
+        start: 0,
+      });
       let list = data.results ?? [];
       if (onlyWa) {
         list = list.filter((h) => hitStateCodes(h).includes('WA'));
       }
+      list = list.slice(0, maxToCheck);
       const base: EnrichedHit[] = list.map((h) => ({
         ...h,
         facilityId: parseFacilityIdFromSearchId(h.id),
@@ -84,9 +98,18 @@ export function FederalCampgroundSearch() {
         try {
           const { merged, nights } = await fetchAvailabilityForStay(hit.facilityId, startDate, endDate);
           const availableSites = countSitesAvailableAllNights(merged, nights, typeFilter);
+          const nyrOnly =
+            availableSites === 0 && hasAllNightsNotYetReleased(merged, nights, typeFilter);
           setHits((prev) =>
             prev.map((p) =>
-              p.facilityId === hit.facilityId ? { ...p, availableSites, loadingAvailability: false } : p,
+              p.facilityId === hit.facilityId
+                ? {
+                    ...p,
+                    availableSites,
+                    loadingAvailability: false,
+                    nyrOnly: nyrOnly ? true : undefined,
+                  }
+                : p,
             ),
           );
         } catch (e) {
@@ -94,7 +117,13 @@ export function FederalCampgroundSearch() {
           setHits((prev) =>
             prev.map((p) =>
               p.facilityId === hit.facilityId
-                ? { ...p, availableSites: null, loadingAvailability: false, availabilityError: msg }
+                ? {
+                    ...p,
+                    availableSites: null,
+                    loadingAvailability: false,
+                    availabilityError: msg,
+                    nyrOnly: undefined,
+                  }
                 : p,
             ),
           );
@@ -170,6 +199,11 @@ export function FederalCampgroundSearch() {
           </div>
         </div>
 
+        <p className="mt-3 rounded-lg bg-white/60 px-3 py-2 text-xs text-gray-700 ring-1 ring-amber-100">
+          <strong className="text-gray-900">Dates:</strong> use the <em>last night you sleep in camp</em>, not the
+          morning you leave. Example: arrive Friday, leave Monday → first night Friday, <strong>last night Sunday</strong>{' '}
+          (not Monday).
+        </p>
         <p className="mt-3 text-xs text-gray-500">
           Data from Recreation.gov — see{' '}
           <a
@@ -248,14 +282,43 @@ export function FederalCampgroundSearch() {
         </div>
       )}
 
+      {availabilityDone && availabilityErrors.length > 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <p className="font-medium">Some availability requests failed ({availabilityErrors.length} of {hits.length})</p>
+          <p className="mt-1 font-mono text-xs opacity-90">{availabilityErrors[0]?.availabilityError}</p>
+          {allAvailabilityFailed && (
+            <p className="mt-2 text-xs">
+              If you see JSON like <code className="rounded bg-white/80 px-1">Missing path</code>, the hosting proxy for{' '}
+              <code className="rounded bg-white/80 px-1">/api/rec</code> needs redeploying.
+            </p>
+          )}
+        </div>
+      )}
+
       {availabilityDone && visibleHits.length === 0 && !searchError && (
         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-6 text-center text-gray-700">
-          <p className="font-medium text-gray-900">No availability in this batch</p>
+          <p className="font-medium text-gray-900">No reservable matches in this batch</p>
           <p className="mt-2 text-sm">
-            None of the campgrounds we checked had a matching site free for every night from {startDate} through{' '}
-            {endDate}. Try wider dates, a different site type, or another search (e.g. a specific forest or park
-            name).
+            We only count nights the API marks as <strong>Available</strong> for online reservation (same data
+            recreation.gov uses for the booking grid). None of the campgrounds we checked had a site matching your
+            filters for <strong>every</strong> night from {startDate} through {endDate}.
           </p>
+          <ul className="mx-auto mt-3 max-w-lg list-disc space-y-1 pl-5 text-left text-sm">
+            <li>
+              Shorten the stay or fix the date range (an extra &quot;last night&quot; is a common mix-up — see note
+              above).
+            </li>
+            <li>
+              Set <strong>Site type</strong> to &quot;Any site type&quot; unless you need a specific hookup.
+            </li>
+            <li>Try another search (forest, lake, or park name) — we now scan more WA results when &quot;Only WA&quot; is on.</li>
+          </ul>
+          {hits.some((h) => h.nyrOnly) && (
+            <p className="mt-4 text-sm text-gray-600">
+              Some locations returned only <strong>NYR</strong> (not yet released) for those dates — reservations may
+              not be open for that window yet in the API, even if the website shows a calendar preview.
+            </p>
+          )}
         </div>
       )}
 

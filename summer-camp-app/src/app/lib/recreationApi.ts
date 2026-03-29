@@ -66,11 +66,23 @@ export async function recreationSearchCampgrounds(params: {
     start: String(params.start ?? 0),
   });
   const res = await fetch(path);
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(t || `Search failed (${res.status})`);
+  const text = await res.text();
+  let data: unknown;
+  try {
+    data = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    throw new Error(text.slice(0, 200) || `Search failed (${res.status})`);
   }
-  return res.json() as Promise<RecreationSearchResponse>;
+  if (!res.ok) {
+    const err = (data as { error?: string }).error;
+    throw new Error(err || text.slice(0, 200) || `Search failed (${res.status})`);
+  }
+  const body = data as Record<string, unknown>;
+  if (body.results === undefined && (body.error != null || body.message != null)) {
+    const msg = [body.error, body.message].filter(Boolean).join(' ');
+    throw new Error(msg || 'Unexpected search response');
+  }
+  return data as RecreationSearchResponse;
 }
 
 /** UTC midnight keys as returned by recreation.gov, e.g. 2026-07-10T00:00:00Z */
@@ -106,11 +118,23 @@ async function fetchOneMonth(facilityId: string, startDateParam: string): Promis
   const encoded = encodeURIComponent(startDateParam);
   const path = `${REC_PROXY}/camps/availability/campground/${facilityId}/month?start_date=${encoded}`;
   const res = await fetch(path);
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(t || `Availability failed (${res.status})`);
+  const text = await res.text();
+  let data: unknown;
+  try {
+    data = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    throw new Error(text.slice(0, 200) || `Availability failed (${res.status})`);
   }
-  return res.json() as Promise<MonthlyAvailabilityResponse>;
+  if (!res.ok) {
+    const err = (data as { error?: string }).error;
+    throw new Error(err || text.slice(0, 200) || `Availability failed (${res.status})`);
+  }
+  const body = data as Record<string, unknown>;
+  if (body.campsites === undefined && (body.error != null || body.message != null)) {
+    const msg = [body.error, body.message].filter(Boolean).join(' ');
+    throw new Error(msg || 'Unexpected availability response');
+  }
+  return data as MonthlyAvailabilityResponse;
 }
 
 /** Merge monthly payloads for one campground (same site ids). */
@@ -129,6 +153,11 @@ function mergeMonthly(parts: MonthlyAvailabilityResponse[]): MonthlyAvailability
   return { campsites };
 }
 
+/** Recreation.gov month payload uses these (and others like Not Reservable, NYR). */
+function nightIsReservableOnline(status: string | undefined): boolean {
+  return status === 'Available';
+}
+
 export function countSitesAvailableAllNights(
   merged: MonthlyAvailabilityResponse,
   nights: string[],
@@ -139,7 +168,7 @@ export function countSitesAvailableAllNights(
     if (campsiteTypeFilter && site.campsite_type !== campsiteTypeFilter) continue;
     let ok = true;
     for (const night of nights) {
-      if (site.availabilities[night] !== 'Available') {
+      if (!nightIsReservableOnline(site.availabilities?.[night])) {
         ok = false;
         break;
       }
@@ -147,6 +176,35 @@ export function countSitesAvailableAllNights(
     if (ok) count++;
   }
   return count;
+}
+
+/** True if every selected night exists in API and is NYR (not yet released), none Reserved. */
+export function hasAllNightsNotYetReleased(
+  merged: MonthlyAvailabilityResponse,
+  nights: string[],
+  campsiteTypeFilter: string | null,
+): boolean {
+  for (const site of Object.values(merged.campsites ?? {})) {
+    if (campsiteTypeFilter && site.campsite_type !== campsiteTypeFilter) continue;
+    let allNyr = true;
+    for (const night of nights) {
+      const s = site.availabilities?.[night];
+      if (s === undefined) {
+        allNyr = false;
+        break;
+      }
+      if (s === 'Reserved' || s === 'Available') {
+        allNyr = false;
+        break;
+      }
+      if (s !== 'NYR') {
+        allNyr = false;
+        break;
+      }
+    }
+    if (allNyr && nights.length > 0) return true;
+  }
+  return false;
 }
 
 export async function fetchAvailabilityForStay(
