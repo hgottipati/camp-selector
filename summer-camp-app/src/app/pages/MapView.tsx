@@ -252,11 +252,18 @@ export default function MapView() {
 
         <div className="divide-y">
           {campgrounds.map((campground) => (
-            <button
+            <div
               key={campground.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => setSelectedCampground(campground)}
-              className={`w-full p-4 text-left transition hover:bg-gray-50 ${
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedCampground(campground);
+                }
+              }}
+              className={`w-full cursor-pointer p-4 text-left transition hover:bg-gray-50 ${
                 selectedCampground.id === campground.id ? "border-l-4 border-green-600 bg-green-50" : ""
               }`}
             >
@@ -306,7 +313,7 @@ export default function MapView() {
                 >
                   View details →
                 </Link>
-                <span onClick={(e) => e.stopPropagation()} className="inline-flex">
+                <span onClick={(e) => e.stopPropagation()} className="relative z-20 inline-flex">
                   <ShareListingButton
                     href={`/campground/${campground.id}`}
                     title={campground.name}
@@ -314,7 +321,7 @@ export default function MapView() {
                   />
                 </span>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>

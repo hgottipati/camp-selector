@@ -21,16 +21,20 @@ function isAbortError(e: unknown): boolean {
   );
 }
 
-/** Works when Clipboard API is blocked (some Safari / embedded WebViews / strict policies). */
+/**
+ * Synchronous copy in the same turn as the click — required for many browsers to honor
+ * user activation (async/await before copy often causes silent Clipboard API failure).
+ */
 function copyWithExecCommand(text: string): boolean {
   const el = document.createElement('textarea');
   el.value = text;
   el.setAttribute('readonly', '');
+  el.setAttribute('aria-hidden', 'true');
   el.style.position = 'fixed';
   el.style.top = '0';
   el.style.left = '0';
-  el.style.width = '1px';
-  el.style.height = '1px';
+  el.style.width = '2em';
+  el.style.height = '2em';
   el.style.padding = '0';
   el.style.border = 'none';
   el.style.outline = 'none';
@@ -39,6 +43,7 @@ function copyWithExecCommand(text: string): boolean {
   document.body.appendChild(el);
 
   const isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent);
+  let ok = false;
   try {
     if (isIOS) {
       const range = document.createRange();
@@ -51,24 +56,36 @@ function copyWithExecCommand(text: string): boolean {
       el.focus();
       el.select();
     }
-    return document.execCommand('copy');
+    ok = document.execCommand('copy');
   } catch {
-    return false;
+    ok = false;
   } finally {
     document.body.removeChild(el);
   }
+  return ok;
 }
 
-async function copyUrlToClipboard(url: string): Promise<boolean> {
-  try {
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(url);
-      return true;
-    }
-  } catch {
-    /* fall through */
+async function tryWebShare(title: string, text: string, url: string): Promise<boolean> {
+  if (typeof navigator === 'undefined' || typeof navigator.share !== 'function') {
+    return false;
   }
-  return copyWithExecCommand(url);
+  const payload: ShareData = { title, text, url };
+  let canTry = true;
+  if (typeof navigator.canShare === 'function') {
+    try {
+      canTry = navigator.canShare(payload);
+    } catch {
+      canTry = false;
+    }
+  }
+  if (!canTry) return false;
+  try {
+    await navigator.share(payload);
+    return true;
+  } catch (e) {
+    if (isAbortError(e)) return false;
+    return false;
+  }
 }
 
 type ShareListingButtonProps = {
@@ -82,35 +99,45 @@ type ShareListingButtonProps = {
 export function ShareListingButton({ href, title, text, className, compact }: ShareListingButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const share = useCallback(async () => {
+  const flashCopied = useCallback(() => {
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }, []);
+
+  const runShare = useCallback(() => {
     const url = resolveShareUrl(href);
     const body = text ?? title;
 
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      const payload: ShareData = { title, text: body, url };
-      const canTry = typeof navigator.canShare !== 'function' || navigator.canShare(payload);
-      if (canTry) {
-        try {
-          await navigator.share(payload);
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 2000);
-          return;
-        } catch (e) {
-          if (isAbortError(e)) return;
-          /* User gesture still valid: fall through to copy */
-        }
-      }
-    }
-
-    const ok = await copyUrlToClipboard(url);
-    if (ok) {
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+    // 1) Sync copy — same synchronous call stack as the click (critical).
+    if (copyWithExecCommand(url)) {
+      flashCopied();
       return;
     }
 
-    window.prompt('Copy this link (press Ctrl+C / ⌘C):', url);
-  }, [href, title, text]);
+    // 2) Clipboard API — do not await anything before this in the handler.
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(url).then(
+        () => {
+          flashCopied();
+        },
+        () => {
+          void (async () => {
+            const shared = await tryWebShare(title, body, url);
+            if (shared) flashCopied();
+            else window.prompt('Copy this link (Ctrl+C / ⌘C):', url);
+          })();
+        },
+      );
+      return;
+    }
+
+    // 3) No clipboard API — try Web Share, then prompt.
+    void (async () => {
+      const shared = await tryWebShare(title, body, url);
+      if (shared) flashCopied();
+      else window.prompt('Copy this link (Ctrl+C / ⌘C):', url);
+    })();
+  }, [href, title, text, flashCopied]);
 
   return (
     <button
@@ -118,10 +145,10 @@ export function ShareListingButton({ href, title, text, className, compact }: Sh
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        void share();
+        runShare();
       }}
       className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-1',
+        'relative z-20 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-1',
         compact ? 'size-9 shrink-0 p-0' : 'px-3 py-2',
         className,
       )}
